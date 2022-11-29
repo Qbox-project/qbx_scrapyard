@@ -54,42 +54,40 @@ CreateThread(function()
             if k ~= 'main' then
                 if Config.UseTarget then
                     if k == 'deliver' then
-                        exports["qb-target"]:AddBoxZone("yard" .. i, v.coords, v.length, v.width, {
-                            name = "yard"..i,
-                            heading = v.heading,
-                            minZ = v.coords.z - 1,
-                            maxZ = v.coords.z + 1,
-                        }, {
+                        exports.ox_target:addBoxZone({
+                            coords = v.coords,
+                            size = vec3(2, 2, 2),
+                            rotation = v.heading,
                             options = {
                                 {
-                                    action = function()
-                                        ScrapVehicle()
-                                    end,
+                                    name = 'qb-scrapyard:scrapVehicle',
                                     icon = "fa fa-wrench",
                                     label = Lang:t('text.disassemble_vehicle_target'),
+                                    distance = 3,
+                                    onSelect = function(_)
+                                        ScrapVehicle()
+                                    end
                                 }
-                            },
-                            distance = 3
+                            }
                         })
                     else
-                        exports["qb-target"]:AddBoxZone("list"..i, v.coords, v.length, v.width, {
-                            name = "list"..i,
-                            heading = v.heading,
-                            minZ = v.coords.z - 1,
-                            maxZ = v.coords.z + 1
-                        }, {
+                        exports.ox_target:addBoxZone({
+                            coords = v.coords,
+                            size = vec3(2, 2, 2),
+                            rotation = v.heading,
                             options = {
                                 {
-                                    action = function()
+                                    name = 'qb-scrapyard:emailList',
+                                    icon = "fa fa-envelop",
+                                    label = Lang:t('text.email_list_target'),
+                                    distance = 1.5,
+                                    onSelect = function(_)
                                         if not IsPedInAnyVehicle(cache.ped) and not emailSend then
                                             CreateListEmail()
                                         end
-                                    end,
-                                    icon = "fa fa-envelop",
-                                    label = Lang:t('text.email_list_target'),
+                                    end
                                 }
-                            },
-                            distance = 1.5
+                            }
                         })
                     end
                 else
@@ -132,16 +130,16 @@ RegisterNetEvent('qb-scapyard:client:setNewVehicles', function(vehicleList)
 end)
 
 function CreateListEmail()
-    if CurrentVehicles ~= nil and next(CurrentVehicles) ~= nil then
+    if CurrentVehicles and next(CurrentVehicles) then
         emailSend = true
 
         local vehicleList = ""
 
         for k, v in pairs(CurrentVehicles) do
-            if CurrentVehicles[k] ~= nil then
+            if CurrentVehicles[k] then
                 local vehicleInfo = QBCore.Shared.Vehicles[v]
 
-                if vehicleInfo ~= nil then
+                if vehicleInfo then
                     vehicleList = vehicleList  .. vehicleInfo.brand .. " " .. vehicleInfo.name .. "<br>"
                 end
             end
@@ -165,13 +163,13 @@ end
 function ScrapVehicle()
     local vehicle = GetVehiclePedIsIn(cache.ped, true)
 
-    if vehicle ~= 0 and vehicle ~= nil then
+    if vehicle then
         if not isBusy then
             if GetPedInVehicleSeat(vehicle, -1) == cache.ped then
                 if IsVehicleValid(GetEntityModel(vehicle)) then
                     local vehiclePlate = QBCore.Functions.GetPlate(vehicle)
 
-                    QBCore.Functions.TriggerCallback('qb-scrapyard:checkOwnerVehicle',function(retval)
+                    QBCore.Functions.TriggerCallback('qb-scrapyard:checkOwnerVehicle', function(retval)
                         if retval then
                             isBusy = true
 
@@ -213,9 +211,9 @@ end
 function IsVehicleValid(vehicleModel)
     local retval = false
 
-    if CurrentVehicles ~= nil and next(CurrentVehicles) ~= nil then
+    if CurrentVehicles and next(CurrentVehicles) then
         for k in pairs(CurrentVehicles) do
-            if CurrentVehicles[k] ~= nil and joaat(CurrentVehicles[k]) == vehicleModel then
+            if CurrentVehicles[k] and joaat(CurrentVehicles[k]) == vehicleModel then
                 retval = true
             end
         end
@@ -227,7 +225,7 @@ end
 function GetVehicleKey(vehicleModel)
     local retval = 0
 
-    if CurrentVehicles ~= nil and next(CurrentVehicles) ~= nil then
+    if CurrentVehicles and next(CurrentVehicles) then
         for k in pairs(CurrentVehicles) do
             if joaat(CurrentVehicles[k]) == vehicleModel then
                 retval = k

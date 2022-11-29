@@ -33,7 +33,7 @@ RegisterNetEvent('qb-scrapyard:server:ScrapVehicle', function(listKey)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
 
-    if CurrentVehicles[listKey] ~= nil then
+    if CurrentVehicles[listKey] then
         for _ = 1, math.random(2, 4), 1 do
             local item = Config.Items[math.random(1, #Config.Items)]
 
@@ -60,7 +60,7 @@ end)
 function GenerateVehicleList()
     CurrentVehicles = {}
 
-    for i = 1, 40, 1 do
+    for i = 1, Config.AmountOfVehicles, 1 do
         local randVehicle = Config.Vehicles[math.random(1, #Config.Vehicles)]
 
         if not IsInList(randVehicle) then
@@ -74,7 +74,7 @@ end
 function IsInList(name)
     local retval = false
 
-    if CurrentVehicles ~= nil and next(CurrentVehicles) ~= nil then
+    if CurrentVehicles and next(CurrentVehicles) then
         for k in pairs(CurrentVehicles) do
             if CurrentVehicles[k] == name then
                 retval = true

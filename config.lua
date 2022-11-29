@@ -2,19 +2,17 @@ Config = Config or {}
 
 Config.UseTarget = GetConvar('UseTarget', 'false') == 'true' -- Use ox_target interactions (don't change this, go to your server.cfg and add `setr UseTarget true` to use this and just that from true to false or the other way around)
 
+Config.AmountOfVehicles = 40
+
 Config.Locations = {
     [1] = {
         ["main"] = vec3(2397.42, 3089.44, 49.92),
         ["deliver"] = {
             coords = vec3(2351.5, 3132.96, 48.2),
-            length = 6.0,
-            width = 4.0,
             heading = 270.0
         },
         ["list"] = {
             coords = vec3(2403.51, 3127.95, 48.15),
-            length = 6.0,
-            width = 4.0,
             heading = 270.0
         }
     }
