@@ -91,19 +91,11 @@ CreateThread(function()
                         })
                     end
                 else
-                    scrapPoly[#scrapPoly + 1] = BoxZone:Create(vec3(v.coords.x, v.coords.y, v.coords.z), v.length, v.width, {
-                        heading = v.heading,
-                        name = k..i,
-                        minZ = v.coords.z - 1,
-                        maxZ = v.coords.z + 1
-                    })
-
-                    local scrapCombo = ComboZone:Create(scrapPoly, {
-                        name = "scrapPoly"
-                    })
-
-                    scrapCombo:onPlayerInOut(function(isPointInside)
-                        if isPointInside then
+                    scrapPoly[#scrapPoly + 1] = lib.zones.box({
+                        coords = v.coords,
+                        size = vec3(1, 1, 1),
+                        rotation = 0.0,
+                        onEnter = function(_)
                             if not isBusy then
                                 if k == 'deliver' then
                                     lib.showTextUI(Lang:t('text.disassemble_vehicle'))
@@ -113,12 +105,13 @@ CreateThread(function()
 
                                 KeyListener(k)
                             end
-                        else
+                        end,
+                        onExit = function(_)
                             listen = false
 
                             lib.hideTextUI()
                         end
-                    end)
+                    })
                 end
             end
         end
