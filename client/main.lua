@@ -2,14 +2,15 @@ local QBCore = exports['qb-core']:GetCoreObject()
 local emailSend = false
 local isBusy = false
 local CurrentVehicles = {}
+local listen = false
 
 RegisterNetEvent("QBCore:Client:OnPlayerLoaded", function()
     TriggerServerEvent("qb-scrapyard:server:LoadVehicleList")
 end)
 
 CreateThread(function()
-    for id in pairs(Config.Locations) do
-        local blip = AddBlipForCoord(Config.Locations[id]["main"].x, Config.Locations[id]["main"].y, Config.Locations[id]["main"].z)
+    for _, data in pairs(Config.Locations) do
+        local blip = AddBlipForCoord(data.main.x, data.main.y, data.main.z)
 
         SetBlipSprite(blip, 380)
         SetBlipDisplay(blip, 4)
@@ -22,8 +23,6 @@ CreateThread(function()
         EndTextCommandSetBlipName(blip)
     end
 end)
-
-local listen = false
 
 local function KeyListener(type)
     CreateThread(function()
@@ -49,7 +48,7 @@ end
 CreateThread(function()
     local scrapPoly = {}
 
-    for i = 1,#Config.Locations,1 do
+    for i = 1, #Config.Locations,1 do
         for k, v in pairs(Config.Locations[i]) do
             if k ~= 'main' then
                 if Config.UseTarget then
@@ -61,7 +60,7 @@ CreateThread(function()
                             options = {
                                 {
                                     name = 'qb-scrapyard:scrapVehicle',
-                                    icon = "fa fa-wrench",
+                                    icon = "fa-solid fa-wrench",
                                     label = Lang:t('text.disassemble_vehicle_target'),
                                     distance = 3,
                                     onSelect = function(_)
@@ -78,7 +77,7 @@ CreateThread(function()
                             options = {
                                 {
                                     name = 'qb-scrapyard:emailList',
-                                    icon = "fa fa-envelop",
+                                    icon = "fa-solid fa-envelope",
                                     label = Lang:t('text.email_list_target'),
                                     distance = 1.5,
                                     onSelect = function(_)
@@ -149,7 +148,10 @@ function CreateListEmail()
             })
         end)
     else
-        QBCore.Functions.Notify(Lang:t('error.demolish_vehicle'), "error")
+        lib.notify({
+            description = Lang:t("error.demolish_vehicle"),
+            type = 'error'
+        })
     end
 end
 
@@ -170,32 +172,49 @@ function ScrapVehicle()
 
                             ScrapVehicleAnim(scrapTime)
 
-                            QBCore.Functions.Progressbar("scrap_vehicle", Lang:t('text.demolish_vehicle'), scrapTime, false, true, {
-                                disableMovement = true,
-                                disableCarMovement = true,
-                                disableMouse = false,
-                                disableCombat = true
-                            }, {}, {}, {}, function() -- Done
+                            if lib.progressBar({
+                                duration = scrapTime,
+                                label = Lang:t('text.demolish_vehicle'),
+                                useWhileDead = false,
+                                canCancel = true,
+                                disable = {
+                                    move = true,
+                                    car = true,
+                                    combat = true
+                                }
+                            }) then
                                 TriggerServerEvent("qb-scrapyard:server:ScrapVehicle", GetVehicleKey(GetEntityModel(vehicle)))
 
                                 SetEntityAsMissionEntity(vehicle, true, true)
                                 DeleteVehicle(vehicle)
 
                                 isBusy = false
-                            end, function() -- Cancel
+                            else
                                 isBusy = false
 
-                                QBCore.Functions.Notify(Lang:t('error.canceled'), "error")
-                            end)
+                                lib.notify({
+                                    description = Lang:t("error.canceled"),
+                                    type = 'error'
+                                })
+                            end
                         else
-                            QBCore.Functions.Notify(Lang:t('error.smash_own'), "error")
+                            lib.notify({
+                                description = Lang:t("error.smash_own"),
+                                type = 'error'
+                            })
                         end
                     end, vehiclePlate)
                 else
-                    QBCore.Functions.Notify(Lang:t('error.cannot_scrap'), "error")
+                    lib.notify({
+                        description = Lang:t("error.cannot_scrap"),
+                        type = 'error'
+                    })
                 end
             else
-                QBCore.Functions.Notify(Lang:t('error.not_driver'), "error")
+                lib.notify({
+                    description = Lang:t("error.not_driver"),
+                    type = 'error'
+                })
             end
         end
     end
