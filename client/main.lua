@@ -1,4 +1,4 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports['qbx-core']:GetCoreObject()
 local emailSend = false
 local isBusy = false
 
@@ -26,7 +26,7 @@ local function KeyListener(type)
         listen = true
         while listen do
             if IsControlPressed(0, 38) then
-                exports['qb-core']:KeyPressed()
+                exports['qbx-core']:KeyPressed()
             if type == 'deliver' then
                 ScrapVehicle()
             else
@@ -99,15 +99,15 @@ CreateThread(function()
                         if isPointInside then
                             if not isBusy then
                                 if k == 'deliver' then
-                                    exports['qb-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
+                                    exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                                 else
-                                    exports['qb-core']:DrawText(Lang:t('text.email_list'),'left')
+                                    exports['qbx-core']:DrawText(Lang:t('text.email_list'),'left')
                                 end
                                 KeyListener(k)
                             end
                         else
                             listen = false
-                            exports['qb-core']:HideText()
+                            exports['qbx-core']:HideText()
                         end
                     end)
                 end
