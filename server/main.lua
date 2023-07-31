@@ -24,7 +24,12 @@ local function generateVehicleList()
 end
 
 lib.callback.register('qb-scrapyard:server:checkOwnerVehicle', function(_, plate)
-    return MySQL.scalar.await("SELECT `plate` FROM `player_vehicles` WHERE `plate` = ?", {plate})
+    local vehicle = MySQL.scalar.await("SELECT `plate` FROM `player_vehicles` WHERE `plate` = ?", {plate})
+    if not vehicle then
+        return true
+    else
+        return false
+    end
 end)
 
 RegisterNetEvent('qb-scrapyard:server:LoadVehicleList', function()

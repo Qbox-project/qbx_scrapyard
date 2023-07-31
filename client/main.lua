@@ -147,6 +147,8 @@ RegisterNetEvent('qb-scapyard:client:setNewVehicles', function(vehicleList)
     Config.CurrentVehicles = vehicleList
 end)
 
+
+
 CreateThread(function()
     for _, v in pairs(Config.Locations) do
         local blip = AddBlipForCoord(v.main.x, v.main.y, v.main.z)
@@ -166,23 +168,26 @@ CreateThread(function()
             if k ~= 'main' then
                 if Config.UseTarget then
                     if k == 'deliver' then
-                        exports["qb-target"]:AddBoxZone("yard"..i, v.coords, v.length, v.width, {
-                            name = "yard"..i,
+                        scrapPoly[#scrapPoly + 1] = BoxZone:Create(vector3(v.coords.x, v.coords.y, v.coords.z), v.length, v.width, {
                             heading = v.heading,
+                            name = k..i,
+                            debugPoly = false,
                             minZ = v.coords.z - 1,
                             maxZ = v.coords.z + 1,
-                        }, {
-                            options = {
-                                {
-                                    action = function()
-                                        scrapVehicle()
-                                    end,
-                                    icon = "fa fa-wrench",
-                                    label = Lang:t('text.disassemble_vehicle_target'),
-                                }
-                            },
-                            distance = 3
                         })
+                        local scrapCombo = ComboZone:Create(scrapPoly, {name = "scrapPoly"})
+                        scrapCombo:onPlayerInOut(function(isPointInside)
+                            local inVehicle = IsPedInAnyVehicle(cache.ped, false)
+                            if isPointInside and inVehicle then
+                                if not isBusy then
+                                    exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
+                                    keyListener(k)
+                                end
+                            else
+                                listen = false
+                                exports['qbx-core']:HideText()
+                            end
+                        end)
                     else
                         exports["qb-target"]:AddBoxZone("list"..i, v.coords, v.length, v.width, {
                             name = "list"..i,
@@ -214,9 +219,10 @@ CreateThread(function()
                     })
                     local scrapCombo = ComboZone:Create(scrapPoly, {name = "scrapPoly"})
                     scrapCombo:onPlayerInOut(function(isPointInside)
+                        local inVehicle = IsPedInAnyVehicle(cache.ped, false)
                         if isPointInside then
                             if not isBusy then
-                                if k == 'deliver' then
+                                if k == 'deliver' and inVehicle then
                                     exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                                 else
                                     exports['qbx-core']:DrawText(Lang:t('text.email_list'),'left')
