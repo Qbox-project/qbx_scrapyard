@@ -143,10 +143,6 @@ RegisterNetEvent("QBCore:Client:OnPlayerLoaded", function()
     TriggerServerEvent("qb-scrapyard:server:LoadVehicleList")
 end)
 
-RegisterNetEvent("QBCore:Client:OnPlayerUnload", function()
-    scrapeZone:remove()
-end)
-
 RegisterNetEvent('qb-scapyard:client:setNewVehicles', function(vehicleList)
     Config.CurrentVehicles = vehicleList
 end)
