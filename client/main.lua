@@ -143,11 +143,13 @@ RegisterNetEvent("QBCore:Client:OnPlayerLoaded", function()
     TriggerServerEvent("qb-scrapyard:server:LoadVehicleList")
 end)
 
+RegisterNetEvent("QBCore:Client:OnPlayerUnload", function()
+    scrapeZone:remove()
+end)
+
 RegisterNetEvent('qb-scapyard:client:setNewVehicles', function(vehicleList)
     Config.CurrentVehicles = vehicleList
 end)
-
-
 
 CreateThread(function()
     for _, v in pairs(Config.Locations) do
@@ -162,32 +164,34 @@ CreateThread(function()
         EndTextCommandSetBlipName(blip)
     end
 
-    local scrapPoly = {}
     for i = 1, #Config.Locations, 1 do
         for k, v in pairs(Config.Locations[i]) do
             if k ~= 'main' then
                 if Config.UseTarget then
                     if k == 'deliver' then
-                        scrapPoly[#scrapPoly + 1] = BoxZone:Create(vector3(v.coords.x, v.coords.y, v.coords.z), v.length, v.width, {
-                            heading = v.heading,
-                            name = k..i,
-                            debugPoly = false,
-                            minZ = v.coords.z - 1,
-                            maxZ = v.coords.z + 1,
-                        })
-                        local scrapCombo = ComboZone:Create(scrapPoly, {name = "scrapPoly"})
-                        scrapCombo:onPlayerInOut(function(isPointInside)
-                            local inVehicle = IsPedInAnyVehicle(cache.ped, false)
-                            if isPointInside and inVehicle then
+                        local inVehicle = IsPedInAnyVehicle(cache.ped, false)
+
+                        local function onEnter()
+                            if inVehicle and not isBusy then
                                 if not isBusy then
                                     exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                                     keyListener(k)
                                 end
-                            else
-                                listen = false
-                                exports['qbx-core']:HideText()
                             end
-                        end)
+                        end
+    
+                        local function onExit()
+                            exports['qbx-core']:HideText()
+                        end
+    
+                        scrapeZone = lib.zones.box({
+                            coords = vec3(v.coords.x, v.coords.y, v.coords.z),
+                            size = vec3(4, 4, 4),
+                            rotation = v.heading,
+                            debug = Config.PolyDebug,
+                            onEnter = onEnter,
+                            onExit = onExit
+                        })
                     else
                         exports["qb-target"]:AddBoxZone("list"..i, v.coords, v.length, v.width, {
                             name = "list"..i,
@@ -210,30 +214,29 @@ CreateThread(function()
                         })
                     end
                 else
-                    scrapPoly[#scrapPoly + 1] = BoxZone:Create(vector3(v.coords.x, v.coords.y, v.coords.z), v.length, v.width, {
-                        heading = v.heading,
-                        name = k..i,
-                        debugPoly = false,
-                        minZ = v.coords.z - 1,
-                        maxZ = v.coords.z + 1,
-                    })
-                    local scrapCombo = ComboZone:Create(scrapPoly, {name = "scrapPoly"})
-                    scrapCombo:onPlayerInOut(function(isPointInside)
-                        local inVehicle = IsPedInAnyVehicle(cache.ped, false)
-                        if isPointInside then
+                    local inVehicle = IsPedInAnyVehicle(cache.ped, false)
+
+                    local function onEnter()
+                        if inVehicle and not isBusy then
                             if not isBusy then
-                                if k == 'deliver' and inVehicle then
-                                    exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
-                                else
-                                    exports['qbx-core']:DrawText(Lang:t('text.email_list'),'left')
-                                end
+                                exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                                 keyListener(k)
                             end
-                        else
-                            listen = false
-                            exports['qbx-core']:HideText()
                         end
-                    end)
+                    end
+
+                    local function onExit()
+                        exports['qbx-core']:HideText()
+                    end
+
+                    scrapeZone = lib.zones.box({
+                        coords = vec3(v.coords.x, v.coords.y, v.coords.z),
+                        size = vec3(4, 4, 4),
+                        rotation = v.heading,
+                        debug = Config.PolyDebug,
+                        onEnter = onEnter,
+                        onExit = onExit
+                    })
                 end
             end
         end
