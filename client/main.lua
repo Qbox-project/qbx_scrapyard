@@ -171,7 +171,7 @@ CreateThread(function()
                             options = {
                                 {
                                     action = function()
-                                        if not cache.vehicle and not emailSent then
+                                        if not IsPedInAnyVehicle(cache.ped, false) and not emailSent then
                                             createListEmail()
                                         end
                                     end,
