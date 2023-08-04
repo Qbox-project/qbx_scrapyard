@@ -145,7 +145,17 @@ CreateThread(function()
                         local function onEnter()
                             if IsPedInAnyVehicle(cache.ped, false) and not isBusy then
                                 exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
-                                scrapVehicle()
+                                CreateThread(function()
+                                    while true do
+                                        if IsControlPressed(0, 38) then
+                                            exports['qbx-core']:KeyPressed()
+                                            exports['qbx-core']:HideText()
+                                            scrapVehicle()
+                                            return
+                                        end
+                                        Wait(0)
+                                    end
+                                end)
                             end
                         end
     
