@@ -167,7 +167,7 @@ CreateThread(function()
                             coords = vec3(v.coords.x, v.coords.y, v.coords.z),
                             size = vec3(4, 4, 4),
                             rotation = v.heading,
-                            debug = Config.ZoneDebug,
+                            debug = Config.DebugZone,
                             onEnter = onEnter,
                             onExit = onExit
                         })
@@ -219,7 +219,7 @@ CreateThread(function()
                             coords = vec3(v.coords.x, v.coords.y, v.coords.z),
                             size = vec3(4, 4, 4),
                             rotation = v.heading,
-                            debug = Config.ZoneDebug,
+                            debug = Config.DebugZone,
                             onEnter = onEnter,
                             onExit = onExit
                         })
@@ -249,7 +249,7 @@ CreateThread(function()
                             coords = vec3(v.coords.x, v.coords.y, v.coords.z),
                             size = vec3(4, 4, 4),
                             rotation = v.heading,
-                            debug = Config.ZoneDebug,
+                            debug = Config.DebugZone,
                             onEnter = onEnter,
                             onExit = onExit
                         })
