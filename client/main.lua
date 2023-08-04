@@ -169,10 +169,8 @@ CreateThread(function()
 
                         local function onEnter()
                             if inVehicle and not isBusy then
-                                if not isBusy then
-                                    exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
-                                    keyListener(k)
-                                end
+                                exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
+                                keyListener(k)
                             end
                         end
     
@@ -214,10 +212,8 @@ CreateThread(function()
 
                     local function onEnter()
                         if inVehicle and not isBusy then
-                            if not isBusy then
-                                exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
-                                keyListener(k)
-                            end
+                            exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
+                            keyListener(k)
                         end
                     end
 
