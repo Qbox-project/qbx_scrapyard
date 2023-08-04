@@ -180,11 +180,11 @@ CreateThread(function()
                             exports['qbx-core']:HideText()
                         end
     
-                        scrapeZone = lib.zones.box({
+                        lib.zones.box({
                             coords = vec3(v.coords.x, v.coords.y, v.coords.z),
                             size = vec3(4, 4, 4),
                             rotation = v.heading,
-                            debug = Config.PolyDebug,
+                            debug = Config.ZoneDebug,
                             onEnter = onEnter,
                             onExit = onExit
                         })
@@ -225,11 +225,11 @@ CreateThread(function()
                         exports['qbx-core']:HideText()
                     end
 
-                    scrapeZone = lib.zones.box({
+                    lib.zones.box({
                         coords = vec3(v.coords.x, v.coords.y, v.coords.z),
                         size = vec3(4, 4, 4),
                         rotation = v.heading,
-                        debug = Config.PolyDebug,
+                        debug = Config.ZoneDebug,
                         onEnter = onEnter,
                         onExit = onExit
                     })
