@@ -8,7 +8,7 @@ Config.Locations = {
     [1] = {
         ["main"] = vector3(2397.42, 3089.44, 49.92),
         ["deliver"] = { coords = vector3(2351.5, 3132.96, 48.2), length = 6.0, width = 4.0, heading = 77.63},
-        ["list"] = { coords = vector3(2403.51, 3127.95, 48.15), length = 6.0, width = 4.0, heading = 270.0},
+        ["list"] = { coords = vector3(2403.51, 3127.95, 48.15), length = 6.0, width = 4.0, heading = 65.56},
     }
 }
 
