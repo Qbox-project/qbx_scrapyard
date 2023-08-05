@@ -1,11 +1,11 @@
 local QBCore = exports['qbx-core']:GetCoreObject()
-local emailSend = false
+local emailSent = false
 local isBusy = false
 
 local function scrapVehicleAnim(time)
     time /= 1000
     lib.requestAnimDict("mp_car_bomb")
-    TaskPlayAnim(cache.ped, "mp_car_bomb", "car_bomb_mechanic" ,3.0, 3.0, -1, 16, 0, false, false, false)
+    TaskPlayAnim(cache.ped, "mp_car_bomb", "car_bomb_mechanic", 3.0, 3.0, -1, 16, 0, false, false, false)
     local openingDoor = true
     CreateThread(function()
         while openingDoor do
@@ -97,7 +97,7 @@ local function createListEmail()
         return
     end
 
-    emailSend = true
+    emailSent = true
     local vehicleList = ""
     for _, v in pairs(Config.CurrentVehicles) do
         local vehicleInfo = QBCore.Shared.Vehicles[v]
@@ -106,36 +106,13 @@ local function createListEmail()
         end
     end
     SetTimeout(math.random(15000, 20000), function()
-        emailSend = false
+        emailSent = false
         TriggerServerEvent('qb-phone:server:sendNewMail', {
             sender = Lang:t('email.sender'),
             subject = Lang:t('email.subject'),
             message = Lang:t('email.message') .. vehicleList,
             button = {}
         })
-    end)
-end
-
-local listen = false
-local function keyListener(_type)
-    CreateThread(function()
-        listen = true
-        while listen do
-            if IsControlPressed(0, 38) then
-                exports['qbx-core']:KeyPressed()
-                if _type == 'deliver' then
-                    scrapVehicle()
-                else
-                    if not IsPedInAnyVehicle(cache.ped, false) and not emailSend then
-                        createListEmail()
-                    end
-                end
-                break
-            end
-            Wait(0)
-        end
-
-        listen = false
     end)
 end
 
@@ -146,8 +123,6 @@ end)
 RegisterNetEvent('qb-scapyard:client:setNewVehicles', function(vehicleList)
     Config.CurrentVehicles = vehicleList
 end)
-
-
 
 CreateThread(function()
     for _, v in pairs(Config.Locations) do
@@ -162,35 +137,42 @@ CreateThread(function()
         EndTextCommandSetBlipName(blip)
     end
 
-    local scrapPoly = {}
     for i = 1, #Config.Locations, 1 do
         for k, v in pairs(Config.Locations[i]) do
             if k ~= 'main' then
                 if Config.UseTarget then
                     if k == 'deliver' then
-                        scrapPoly[#scrapPoly + 1] = BoxZone:Create(vector3(v.coords.x, v.coords.y, v.coords.z), v.length, v.width, {
-                            heading = v.heading,
-                            name = k..i,
-                            debugPoly = false,
-                            minZ = v.coords.z - 1,
-                            maxZ = v.coords.z + 1,
-                        })
-                        local scrapCombo = ComboZone:Create(scrapPoly, {name = "scrapPoly"})
-                        scrapCombo:onPlayerInOut(function(isPointInside)
-                            local inVehicle = IsPedInAnyVehicle(cache.ped, false)
-                            if isPointInside and inVehicle then
-                                if not isBusy then
-                                    exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
-                                    keyListener(k)
-                                end
-                            else
-                                listen = false
-                                exports['qbx-core']:HideText()
+                        local function onEnter()
+                            if cache.vehicle and not isBusy then
+                                exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
+                                CreateThread(function()
+                                    while true do
+                                        if IsControlPressed(0, 38) then
+                                            exports['qbx-core']:HideText()
+                                            scrapVehicle()
+                                            break
+                                        end
+                                        Wait(0)
+                                    end
+                                end)
                             end
-                        end)
+                        end
+    
+                        local function onExit()
+                            exports['qbx-core']:HideText()
+                        end
+    
+                        lib.zones.box({
+                            coords = vec3(v.coords.x, v.coords.y, v.coords.z),
+                            size = vec3(4, 4, 4),
+                            rotation = v.heading,
+                            debug = Config.DebugZone,
+                            onEnter = onEnter,
+                            onExit = onExit
+                        })
                     else
-                        exports["qb-target"]:AddBoxZone("list"..i, v.coords, v.length, v.width, {
-                            name = "list"..i,
+                        exports["qb-target"]:AddBoxZone("list" .. i, v.coords, v.length, v.width, {
+                            name = "list" .. i,
                             heading = v.heading,
                             minZ = v.coords.z - 1,
                             maxZ = v.coords.z + 1,
@@ -198,7 +180,7 @@ CreateThread(function()
                             options = {
                                 {
                                     action = function()
-                                        if not IsPedInAnyVehicle(cache.ped, false) and not emailSend then
+                                        if not cache.vehicle and not emailSent then
                                             createListEmail()
                                         end
                                     end,
@@ -210,30 +192,65 @@ CreateThread(function()
                         })
                     end
                 else
-                    scrapPoly[#scrapPoly + 1] = BoxZone:Create(vector3(v.coords.x, v.coords.y, v.coords.z), v.length, v.width, {
-                        heading = v.heading,
-                        name = k..i,
-                        debugPoly = false,
-                        minZ = v.coords.z - 1,
-                        maxZ = v.coords.z + 1,
-                    })
-                    local scrapCombo = ComboZone:Create(scrapPoly, {name = "scrapPoly"})
-                    scrapCombo:onPlayerInOut(function(isPointInside)
-                        local inVehicle = IsPedInAnyVehicle(cache.ped, false)
-                        if isPointInside then
-                            if not isBusy then
-                                if k == 'deliver' and inVehicle then
-                                    exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
-                                else
-                                    exports['qbx-core']:DrawText(Lang:t('text.email_list'),'left')
-                                end
-                                keyListener(k)
+                    if k == 'deliver' then
+                        local function onEnter()
+                            if cache.vehicle and not isBusy then
+                                exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
+                                CreateThread(function()
+                                    while true do
+                                        if IsControlPressed(0, 38) then
+                                            exports['qbx-core']:HideText()
+                                            scrapVehicle()
+                                            break
+                                        end
+                                        Wait(0)
+                                    end
+                                end)
                             end
-                        else
-                            listen = false
+                        end
+    
+                        local function onExit()
                             exports['qbx-core']:HideText()
                         end
-                    end)
+    
+                        lib.zones.box({
+                            coords = vec3(v.coords.x, v.coords.y, v.coords.z),
+                            size = vec3(4, 4, 4),
+                            rotation = v.heading,
+                            debug = Config.DebugZone,
+                            onEnter = onEnter,
+                            onExit = onExit
+                        })
+                    else
+                        local function onEnter()
+                            if not cache.vehicle and not isBusy then
+                                exports['qbx-core']:DrawText(Lang:t('text.email_list_target'), 'left')
+                                CreateThread(function()
+                                    while true do
+                                        if IsControlPressed(0, 38) then
+                                            exports['qbx-core']:HideText()
+                                            createListEmail()
+                                            break
+                                        end
+                                        Wait(0)
+                                    end
+                                end)
+                            end
+                        end
+    
+                        local function onExit()
+                            exports['qbx-core']:HideText()
+                        end
+    
+                        lib.zones.box({
+                            coords = vec3(v.coords.x, v.coords.y, v.coords.z),
+                            size = vec3(4, 4, 4),
+                            rotation = v.heading,
+                            debug = Config.DebugZone,
+                            onEnter = onEnter,
+                            onExit = onExit
+                        })
+                    end
                 end
             end
         end
