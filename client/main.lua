@@ -148,10 +148,9 @@ CreateThread(function()
                                 CreateThread(function()
                                     while true do
                                         if IsControlPressed(0, 38) then
-                                            exports['qbx-core']:KeyPressed()
                                             exports['qbx-core']:HideText()
                                             scrapVehicle()
-                                            return
+                                            break
                                         end
                                         Wait(0)
                                     end
@@ -200,10 +199,9 @@ CreateThread(function()
                                 CreateThread(function()
                                     while true do
                                         if IsControlPressed(0, 38) then
-                                            exports['qbx-core']:KeyPressed()
                                             exports['qbx-core']:HideText()
                                             scrapVehicle()
-                                            return
+                                            break
                                         end
                                         Wait(0)
                                     end
@@ -230,10 +228,9 @@ CreateThread(function()
                                 CreateThread(function()
                                     while true do
                                         if IsControlPressed(0, 38) then
-                                            exports['qbx-core']:KeyPressed()
                                             exports['qbx-core']:HideText()
                                             createListEmail()
-                                            return
+                                            break
                                         end
                                         Wait(0)
                                     end
