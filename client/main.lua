@@ -143,7 +143,7 @@ CreateThread(function()
                 if Config.UseTarget then
                     if k == 'deliver' then
                         local function onEnter()
-                            if IsPedInAnyVehicle(cache.ped, false) and not isBusy then
+                            if cache.vehicle and not isBusy then
                                 exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                                 CreateThread(function()
                                     while true do
@@ -180,7 +180,7 @@ CreateThread(function()
                             options = {
                                 {
                                     action = function()
-                                        if not IsPedInAnyVehicle(cache.ped, false) and not emailSent then
+                                        if not cache.vehicle and not emailSent then
                                             createListEmail()
                                         end
                                     end,
@@ -194,7 +194,7 @@ CreateThread(function()
                 else
                     if k == 'deliver' then
                         local function onEnter()
-                            if IsPedInAnyVehicle(cache.ped, false) and not isBusy then
+                            if cache.vehicle and not isBusy then
                                 exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                                 CreateThread(function()
                                     while true do
@@ -223,7 +223,7 @@ CreateThread(function()
                         })
                     else
                         local function onEnter()
-                            if not IsPedInAnyVehicle(cache.ped, false) and not isBusy then
+                            if not cache.vehicle and not isBusy then
                                 exports['qbx-core']:DrawText(Lang:t('text.email_list_target'), 'left')
                                 CreateThread(function()
                                     while true do
