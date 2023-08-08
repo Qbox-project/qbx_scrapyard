@@ -1,6 +1,7 @@
 local QBCore = exports['qbx-core']:GetCoreObject()
 local emailSent = false
 local isBusy = false
+local inZone = false
 
 local function scrapVehicleAnim(time)
     time /= 1000
@@ -143,14 +144,15 @@ CreateThread(function()
                 if Config.UseTarget then
                     if k == 'deliver' then
                         local function onEnter()
+                            inZone = true
                             if cache.vehicle and not isBusy then
                                 exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                                 CreateThread(function()
-                                    while true do
+                                    while inZone do
                                         if IsControlPressed(0, 38) then
                                             exports['qbx-core']:HideText()
                                             scrapVehicle()
-                                            break
+                                            return
                                         end
                                         Wait(0)
                                     end
@@ -159,6 +161,7 @@ CreateThread(function()
                         end
     
                         local function onExit()
+                            inZone = false
                             exports['qbx-core']:HideText()
                         end
     
@@ -194,14 +197,15 @@ CreateThread(function()
                 else
                     if k == 'deliver' then
                         local function onEnter()
+                            inZone = true
                             if cache.vehicle and not isBusy then
                                 exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                                 CreateThread(function()
-                                    while true do
+                                    while inZone do
                                         if IsControlPressed(0, 38) then
                                             exports['qbx-core']:HideText()
                                             scrapVehicle()
-                                            break
+                                            return
                                         end
                                         Wait(0)
                                     end
@@ -210,6 +214,7 @@ CreateThread(function()
                         end
     
                         local function onExit()
+                            inZone = false
                             exports['qbx-core']:HideText()
                         end
     
@@ -223,14 +228,15 @@ CreateThread(function()
                         })
                     else
                         local function onEnter()
+                            inZone = true
                             if not cache.vehicle and not isBusy then
                                 exports['qbx-core']:DrawText(Lang:t('text.email_list_target'), 'left')
                                 CreateThread(function()
-                                    while true do
+                                    while inZone do
                                         if IsControlPressed(0, 38) then
                                             exports['qbx-core']:HideText()
                                             createListEmail()
-                                            break
+                                            return
                                         end
                                         Wait(0)
                                     end
@@ -239,6 +245,7 @@ CreateThread(function()
                         end
     
                         local function onExit()
+                            inZone = false
                             exports['qbx-core']:HideText()
                         end
     
