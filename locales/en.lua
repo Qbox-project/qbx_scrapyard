@@ -13,6 +13,7 @@ local Translations = {
         email_list = "[E] - E-mail Vehicle List",
         email_list_target = "E-mail Vehicle List",
         demolish_vehicle = "Demolish Vehicle",
+        email_sent = "You will receive the list by email in a few seconds",
     },
     email = {
         sender = "Turner’s Auto Wrecking",
