@@ -6,12 +6,16 @@ version '1.0.0'
 
 shared_script {
     '@ox_lib/init.lua',
-    '@PolyZone/client.lua',
-    '@PolyZone/BoxZone.lua',
-    '@PolyZone/ComboZone.lua',
+    '@qbx-core/shared/locale.lua',
+    '@qbx-core/import.lua',
+    'locales/en.lua',
+    'locales/*.lua',
     'config.lua',
-    '@qb-core/shared/locale.lua',
-    'locales/en.lua', -- Change to the language you want
+}
+
+modules {
+    'qbx-core:core',
+    'qbx-core:utils'
 }
 
 server_scripts {
