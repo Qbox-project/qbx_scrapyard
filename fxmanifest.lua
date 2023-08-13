@@ -14,8 +14,7 @@ shared_script {
 }
 
 modules {
-    'qbx-core:core',
-    'qbx-core:utils'
+    'qbx-core:core'
 }
 
 server_scripts {
