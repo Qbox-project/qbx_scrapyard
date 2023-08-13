@@ -171,7 +171,7 @@ CreateThread(function()
                             onExit = onExit
                         })
                     else
-                        local model = `a_m_m_hillbilly_01`
+                        local model = v?.pedModel
                         lib.requestModel(model, 500)
                         local pedList = CreatePed(4, model, v?.coords.x, v?.coords.y, v?.coords.z - 1, v?.coords.w, true, true)
                         FreezeEntityPosition(pedList, true)
