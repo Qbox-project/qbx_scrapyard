@@ -182,7 +182,9 @@ CreateThread(function()
                                 icon = "fas fa-list-ul",
                                 distance = 1.5,
                                 onSelect = createListEmail,
-                                canInteract = not emailSent,
+                                canInteract = function()
+                                    return not emailSent
+                                end,
                             }
                         })
                     end
