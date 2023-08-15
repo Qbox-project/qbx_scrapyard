@@ -1,4 +1,3 @@
-local QBCore = exports['qbx-core']:GetCoreObject()
 local emailSent = false
 local isBusy = false
 
@@ -92,6 +91,7 @@ local function scrapVehicle()
 end
 
 local function createListEmail()
+    if cache.vehicle then return end
     if not Config.CurrentVehicles or table.type(Config.CurrentVehicles) == 'empty' then
         QBCore.Functions.Notify(Lang:t('error.demolish_vehicle'), "error")
         return
@@ -105,6 +105,7 @@ local function createListEmail()
             vehicleList = vehicleList  .. vehicleInfo["brand"] .. " " .. vehicleInfo["name"] .. "<br />"
         end
     end
+    QBCore.Functions.Notify(Lang:t('text.email_sent'), "success")
     SetTimeout(math.random(15000, 20000), function()
         emailSent = false
         TriggerServerEvent('qb-phone:server:sendNewMail', {
@@ -147,7 +148,7 @@ CreateThread(function()
                                 exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                             end
                         end
-    
+
                         local function onExit()
                             exports['qbx-core']:HideText()
                         end
@@ -159,35 +160,32 @@ CreateThread(function()
                                 return
                             end
                         end
-    
+
                         lib.zones.box({
-                            coords = vec3(v.coords.x, v.coords.y, v.coords.z),
+                            coords = vec3(v?.coords.x, v?.coords.y, v?.coords.z),
                             size = vec3(4, 4, 4),
-                            rotation = v.heading,
+                            rotation = v?.heading,
                             debug = Config.DebugZone,
                             inside = inside,
                             onEnter = onEnter,
                             onExit = onExit
                         })
                     else
-                        exports["qb-target"]:AddBoxZone("list" .. i, v.coords, v.length, v.width, {
-                            name = "list" .. i,
-                            heading = v.heading,
-                            minZ = v.coords.z - 1,
-                            maxZ = v.coords.z + 1,
-                        }, {
-                            options = {
-                                {
-                                    action = function()
-                                        if not cache.vehicle and not emailSent then
-                                            createListEmail()
-                                        end
-                                    end,
-                                    icon = "fa fa-envelop",
-                                    label = Lang:t('text.email_list_target'),
-                                }
-                            },
-                            distance = 1.5
+                        local model = v?.pedModel
+                        lib.requestModel(model, 500)
+                        local pedList = CreatePed(4, model, v?.coords.x, v?.coords.y, v?.coords.z - 1, v?.coords.w, true, true)
+                        FreezeEntityPosition(pedList, true)
+                        exports.ox_target:addLocalEntity(pedList, {
+                            {
+                                name = "scrapyard_list" .. i,
+                                label = Lang:t("text.email_list_target"),
+                                icon = "fas fa-list-ul",
+                                distance = 1.5,
+                                onSelect = createListEmail,
+                                canInteract = function()
+                                    return not emailSent
+                                end,
+                            }
                         })
                     end
                 else
@@ -197,7 +195,7 @@ CreateThread(function()
                                 exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
                             end
                         end
-    
+
                         local function onExit()
                             exports['qbx-core']:HideText()
                         end
@@ -209,7 +207,7 @@ CreateThread(function()
                                 return
                             end
                         end
-    
+
                         lib.zones.box({
                             coords = vec3(v.coords.x, v.coords.y, v.coords.z),
                             size = vec3(4, 4, 4),
@@ -225,7 +223,7 @@ CreateThread(function()
                                 exports['qbx-core']:DrawText(Lang:t('text.email_list_target'), 'left')
                             end
                         end
-    
+
                         local function onExit()
                             exports['qbx-core']:HideText()
                         end
@@ -237,7 +235,7 @@ CreateThread(function()
                                 return
                             end
                         end
-    
+
                         lib.zones.box({
                             coords = vec3(v.coords.x, v.coords.y, v.coords.z),
                             size = vec3(4, 4, 4),

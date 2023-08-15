@@ -1,5 +1,3 @@
-local QBCore = exports['qbx-core']:GetCoreObject()
-
 local function isInList(name)
     local retval = false
     if Config.CurrentVehicles ~= nil and next(Config.CurrentVehicles) ~= nil then
