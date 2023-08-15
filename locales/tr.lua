@@ -13,6 +13,7 @@ local Translations = {
         email_list = "[E] - Araç Listesi Gönder",
         email_list_target = "Araç Listesi Gönder",
         demolish_vehicle = "Aracı Parçala",
+        email_sent = "Araç Listesini Birkaç Saniye İçinde E-posta Yoluyla Alacaksınız",
     },
     email = {
         sender = "Turner’s Araç Parçalama",
@@ -21,7 +22,9 @@ local Translations = {
     },
 }
 
-Lang = Locale:new({
-    phrases = Translations,
-    warnOnMissing = true
-})
+if GetConvar('qb_locale', 'en') == 'tr' then
+    Lang = Locale:new({
+        phrases = Translations,
+        warnOnMissing = true
+    })
+end
