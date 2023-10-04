@@ -2,20 +2,19 @@ fx_version 'cerulean'
 game 'gta5'
 
 description 'QBX-Scrapyard'
+repository 'https://github.com/Qbox-project/qbx_scrapyard'
 version '1.0.0'
 
 shared_script {
     '@ox_lib/init.lua',
-    '@qbx-core/shared/locale.lua',
-    '@qbx-core/import.lua',
+    '@qbx_core/shared/locale.lua',
+    '@qbx_core/import.lua',
     'locales/en.lua',
     'locales/*.lua',
     'config.lua',
 }
 
-modules {
-    'qbx-core:core'
-}
+modules {'qbx_core:utils'}
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
