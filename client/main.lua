@@ -1,3 +1,4 @@
+local VEHICLES = exports.qbx_core:GetVehiclesByName()
 local emailSent = false
 local isBusy = false
 
@@ -100,7 +101,7 @@ local function createListEmail()
     emailSent = true
     local vehicleList = ""
     for _, v in pairs(Config.CurrentVehicles) do
-        local vehicleInfo = exports.qbx_core:GetVehiclesByName()[v]
+        local vehicleInfo = VEHICLES[v]
         if vehicleInfo then
             vehicleList = vehicleList  .. vehicleInfo["brand"] .. " " .. vehicleInfo["name"] .. "<br />"
         end
