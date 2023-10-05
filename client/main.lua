@@ -1,3 +1,4 @@
+local VEHICLES = exports.qbx_core:GetVehiclesByName()
 local emailSent = false
 local isBusy = false
 
@@ -53,7 +54,7 @@ local function scrapVehicle()
 
     if cache.seat == -1 then
         if isVehicleValid(GetEntityModel(vehicle)) then
-            local vehiclePlate = QBCore.Functions.GetPlate(vehicle)
+            local vehiclePlate = GetPlate(vehicle)
             local retval = lib.callback.await('qb-scrapyard:server:checkOwnerVehicle', false, vehiclePlate)
             if retval then
                 isBusy = true
@@ -75,37 +76,37 @@ local function scrapVehicle()
                     SetEntityAsMissionEntity(vehicle, true, true)
                     DeleteVehicle(vehicle)
                 else
-                    QBCore.Functions.Notify(Lang:t('error.canceled'), "error")
+                   exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
                 end
 
                 isBusy = false
             else
-                QBCore.Functions.Notify(Lang:t('error.smash_own'), "error")
+               exports.qbx_core:Notify(Lang:t('error.smash_own'), 'error')
             end
         else
-            QBCore.Functions.Notify(Lang:t('error.cannot_scrap'), "error")
+           exports.qbx_core:Notify(Lang:t('error.cannot_scrap'), 'error')
         end
     else
-        QBCore.Functions.Notify(Lang:t('error.not_driver'), "error")
+       exports.qbx_core:Notify(Lang:t('error.not_driver'), 'error')
     end
 end
 
 local function createListEmail()
     if cache.vehicle then return end
     if not Config.CurrentVehicles or table.type(Config.CurrentVehicles) == 'empty' then
-        QBCore.Functions.Notify(Lang:t('error.demolish_vehicle'), "error")
+       exports.qbx_core:Notify(Lang:t('error.demolish_vehicle'), 'error')
         return
     end
 
     emailSent = true
     local vehicleList = ""
     for _, v in pairs(Config.CurrentVehicles) do
-        local vehicleInfo = QBCore.Shared.Vehicles[v]
+        local vehicleInfo = VEHICLES[v]
         if vehicleInfo then
             vehicleList = vehicleList  .. vehicleInfo["brand"] .. " " .. vehicleInfo["name"] .. "<br />"
         end
     end
-    QBCore.Functions.Notify(Lang:t('text.email_sent'), "success")
+   exports.qbx_core:Notify(Lang:t('text.email_sent'), 'success')
     SetTimeout(math.random(15000, 20000), function()
         emailSent = false
         TriggerServerEvent('qb-phone:server:sendNewMail', {
@@ -145,17 +146,17 @@ CreateThread(function()
                     if k == 'deliver' then
                         local function onEnter()
                             if cache.vehicle and not isBusy then
-                                exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
+                                lib.showTextUI(Lang:t('text.disassemble_vehicle'), {position = 'left-center'})
                             end
                         end
 
                         local function onExit()
-                            exports['qbx-core']:HideText()
+                            lib.hideTextUI()
                         end
 
                         local function inside()
                             if IsControlPressed(0, 38) and not isBusy then
-                                exports['qbx-core']:HideText()
+                                lib.hideTextUI()
                                 scrapVehicle()
                                 return
                             end
@@ -192,17 +193,17 @@ CreateThread(function()
                     if k == 'deliver' then
                         local function onEnter()
                             if cache.vehicle and not isBusy then
-                                exports['qbx-core']:DrawText(Lang:t('text.disassemble_vehicle'),'left')
+                                lib.showTextUI(Lang:t('text.disassemble_vehicle'), {position = 'left-center'})
                             end
                         end
 
                         local function onExit()
-                            exports['qbx-core']:HideText()
+                            lib.hideTextUI()
                         end
 
                         local function inside()
                             if IsControlPressed(0, 38) and not isBusy then
-                                exports['qbx-core']:HideText()
+                                lib.hideTextUI()
                                 scrapVehicle()
                                 return
                             end
@@ -220,17 +221,17 @@ CreateThread(function()
                     else
                         local function onEnter()
                             if not cache.vehicle and not isBusy then
-                                exports['qbx-core']:DrawText(Lang:t('text.email_list_target'), 'left')
+                                lib.showTextUI(Lang:t('text.email_list_target'), {position = 'left-center'})
                             end
                         end
 
                         local function onExit()
-                            exports['qbx-core']:HideText()
+                            lib.hideTextUI()
                         end
 
                         local function inside()
                             if IsControlPressed(0, 38) and not emailSent then
-                                exports['qbx-core']:HideText()
+                                lib.hideTextUI()
                                 createListEmail()
                                 return
                             end

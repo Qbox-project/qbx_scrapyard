@@ -1,3 +1,5 @@
+local ITEMS = exports.ox_inventory:Items()
+
 local function isInList(name)
     local retval = false
     if Config.CurrentVehicles ~= nil and next(Config.CurrentVehicles) ~= nil then
@@ -36,13 +38,13 @@ end)
 
 RegisterNetEvent('qb-scrapyard:server:ScrapVehicle', function(listKey)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports.qbx_core:GetPlayer(src)
     if not Player or not Config.CurrentVehicles[listKey] then return end
 
     for _ = 1, math.random(2, 4), 1 do
         local item = Config.Items[math.random(1, #Config.Items)]
         Player.Functions.AddItem(item, math.random(25, 45))
-        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], 'add')
+        TriggerClientEvent('inventory:client:ItemBox', src, ITEMS[item], 'add')
         Wait(500)
     end
 
@@ -51,7 +53,7 @@ RegisterNetEvent('qb-scrapyard:server:ScrapVehicle', function(listKey)
     if luck == odd then
         local random = math.random(10, 20)
         Player.Functions.AddItem("rubber", random)
-        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items["rubber"], 'add')
+        TriggerClientEvent('inventory:client:ItemBox', src, ITEMS["rubber"], 'add')
     end
 
     Config.CurrentVehicles[listKey] = nil
