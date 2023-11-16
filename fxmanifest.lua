@@ -1,27 +1,25 @@
 fx_version 'cerulean'
 game 'gta5'
 
-description 'QBX-Scrapyard'
+description 'QBX_Scrapyard'
 repository 'https://github.com/Qbox-project/qbx_scrapyard'
 version '1.0.0'
 
 shared_script {
     '@ox_lib/init.lua',
+    '@qbx_core/modules/utils.lua',
     '@qbx_core/shared/locale.lua',
-    '@qbx_core/import.lua',
     'locales/en.lua',
     'locales/*.lua',
     'config.lua',
 }
 
-modules {'qbx_core:utils'}
+client_script 'client/main.lua'
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/main.lua'
 }
-
-client_script 'client/main.lua'
 
 provide 'qb-scrapyard'
 lua54 'yes'
