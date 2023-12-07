@@ -1,3 +1,5 @@
+local config = require 'config.client'
+local sharedConfig = require 'config.shared'
 local VEHICLES = exports.qbx_core:GetVehiclesByName()
 local emailSent = false
 local isBusy = false
@@ -21,11 +23,11 @@ local function scrapVehicleAnim(time)
 end
 
 local function getVehicleKey(vehicleModel)
-    if not Config.CurrentVehicles or table.type(Config.CurrentVehicles) == 'empty' then
+    if not sharedConfig.currentVehicles or table.type(sharedConfig.currentVehicles) == 'empty' then
         return 0
     end
 
-    for k, v in pairs(Config.CurrentVehicles) do
+    for k, v in pairs(sharedConfig.currentVehicles) do
         if joaat(v) == vehicleModel then
             return k
         end
@@ -35,11 +37,11 @@ local function getVehicleKey(vehicleModel)
 end
 
 local function isVehicleValid(vehicleModel)
-    if not Config.CurrentVehicles or table.type(Config.CurrentVehicles) == 'empty' then
+    if not sharedConfig.currentVehicles or table.type(sharedConfig.currentVehicles) == 'empty' then
         return false
     end
 
-    for _, v in pairs(Config.CurrentVehicles) do
+    for _, v in pairs(sharedConfig.currentVehicles) do
         if joaat(v) == vehicleModel then
             return true
         end
@@ -93,14 +95,14 @@ end
 
 local function createListEmail()
     if cache.vehicle then return end
-    if not Config.CurrentVehicles or table.type(Config.CurrentVehicles) == 'empty' then
+    if not sharedConfig.currentVehicles or table.type(sharedConfig.currentVehicles) == 'empty' then
        exports.qbx_core:Notify(Lang:t('error.demolish_vehicle'), 'error')
         return
     end
 
     emailSent = true
     local vehicleList = ""
-    for _, v in pairs(Config.CurrentVehicles) do
+    for _, v in pairs(sharedConfig.currentVehicles) do
         local vehicleInfo = VEHICLES[v]
         if vehicleInfo then
             vehicleList = vehicleList  .. vehicleInfo["brand"] .. " " .. vehicleInfo["name"] .. "<br />"
@@ -123,11 +125,11 @@ RegisterNetEvent("QBCore:Client:OnPlayerLoaded", function()
 end)
 
 RegisterNetEvent('qb-scapyard:client:setNewVehicles', function(vehicleList)
-    Config.CurrentVehicles = vehicleList
+    sharedConfig.currentVehicles = vehicleList
 end)
 
 CreateThread(function()
-    for _, v in pairs(Config.Locations) do
+    for _, v in pairs(config.locations) do
         local blip = AddBlipForCoord(v.main.x, v.main.y, v.main.z)
         SetBlipSprite(blip, 380)
         SetBlipDisplay(blip, 4)
@@ -139,10 +141,10 @@ CreateThread(function()
         EndTextCommandSetBlipName(blip)
     end
 
-    for i = 1, #Config.Locations, 1 do
-        for k, v in pairs(Config.Locations[i]) do
+    for i = 1, #config.locations, 1 do
+        for k, v in pairs(config.locations[i]) do
             if k ~= 'main' then
-                if Config.UseTarget then
+                if config.useTarget then
                     if k == 'deliver' then
                         local function onEnter()
                             if cache.vehicle and not isBusy then
@@ -166,7 +168,7 @@ CreateThread(function()
                             coords = vec3(v?.coords.x, v?.coords.y, v?.coords.z),
                             size = vec3(4, 4, 4),
                             rotation = v?.heading,
-                            debug = Config.DebugZone,
+                            debug = config.debugPoly,
                             inside = inside,
                             onEnter = onEnter,
                             onExit = onExit
@@ -213,7 +215,7 @@ CreateThread(function()
                             coords = vec3(v.coords.x, v.coords.y, v.coords.z),
                             size = vec3(4, 4, 4),
                             rotation = v.heading,
-                            debug = Config.DebugZone,
+                            debug = config.debugPoly,
                             inside = inside,
                             onEnter = onEnter,
                             onExit = onExit
@@ -241,7 +243,7 @@ CreateThread(function()
                             coords = vec3(v.coords.x, v.coords.y, v.coords.z),
                             size = vec3(4, 4, 4),
                             rotation = v.heading,
-                            debug = Config.DebugZone,
+                            debug = config.debugPoly,
                             inside = inside,
                             onEnter = onEnter,
                             onExit = onExit
