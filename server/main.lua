@@ -1,12 +1,12 @@
 local config = require 'config.server'
-local sharedConfig = require 'config.shared'
 local ITEMS = exports.ox_inventory:Items()
+local currentVehicles = {}
 
 local function isInList(name)
     local retval = false
-    if sharedConfig.currentVehicles ~= nil and next(sharedConfig.currentVehicles) ~= nil then
-        for k in pairs(sharedConfig.currentVehicles) do
-            if sharedConfig.currentVehicles[k] == name then
+    if currentVehicles ~= nil and next(currentVehicles) ~= nil then
+        for k in pairs(currentVehicles) do
+            if currentVehicles[k] == name then
                 retval = true
             end
         end
@@ -15,14 +15,14 @@ local function isInList(name)
 end
 
 local function generateVehicleList()
-    sharedConfig.currentVehicles = {}
+    currentVehicles = {}
     for i = 1, 40, 1 do
         local randVehicle = config.vehicles[math.random(1, #config.vehicles)]
         if not isInList(randVehicle) then
-            sharedConfig.currentVehicles[i] = randVehicle
+            currentVehicles[i] = randVehicle
         end
     end
-    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, sharedConfig.currentVehicles)
+    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, currentVehicles)
 end
 
 lib.callback.register('qb-scrapyard:server:checkOwnerVehicle', function(_, plate)
@@ -35,13 +35,13 @@ lib.callback.register('qb-scrapyard:server:checkOwnerVehicle', function(_, plate
 end)
 
 RegisterNetEvent('qb-scrapyard:server:LoadVehicleList', function()
-    TriggerClientEvent("qb-scapyard:client:setNewVehicles", source, sharedConfig.currentVehicles)
+    TriggerClientEvent("qb-scapyard:client:setNewVehicles", source, currentVehicles)
 end)
 
 RegisterNetEvent('qb-scrapyard:server:ScrapVehicle', function(listKey)
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
-    if not Player or not sharedConfig.currentVehicles[listKey] then return end
+    if not Player or not currentVehicles[listKey] then return end
 
     for _ = 1, math.random(2, 4), 1 do
         local item = config.items[math.random(1, #config.items)]
@@ -58,8 +58,8 @@ RegisterNetEvent('qb-scrapyard:server:ScrapVehicle', function(listKey)
         TriggerClientEvent('inventory:client:ItemBox', src, ITEMS["rubber"], 'add')
     end
 
-    sharedConfig.currentVehicles[listKey] = nil
-    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, sharedConfig.currentVehicles)
+    currentVehicles[listKey] = nil
+    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, currentVehicles)
 end)
 
 CreateThread(function()

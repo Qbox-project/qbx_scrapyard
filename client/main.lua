@@ -1,6 +1,6 @@
 local config = require 'config.client'
-local sharedConfig = require 'config.shared'
 local VEHICLES = exports.qbx_core:GetVehiclesByName()
+local currentVehicles = {}
 local emailSent = false
 local isBusy = false
 
@@ -23,11 +23,11 @@ local function scrapVehicleAnim(time)
 end
 
 local function getVehicleKey(vehicleModel)
-    if not sharedConfig.currentVehicles or table.type(sharedConfig.currentVehicles) == 'empty' then
+    if not currentVehicles or table.type(currentVehicles) == 'empty' then
         return 0
     end
 
-    for k, v in pairs(sharedConfig.currentVehicles) do
+    for k, v in pairs(currentVehicles) do
         if joaat(v) == vehicleModel then
             return k
         end
@@ -37,11 +37,11 @@ local function getVehicleKey(vehicleModel)
 end
 
 local function isVehicleValid(vehicleModel)
-    if not sharedConfig.currentVehicles or table.type(sharedConfig.currentVehicles) == 'empty' then
+    if not currentVehicles or table.type(currentVehicles) == 'empty' then
         return false
     end
 
-    for _, v in pairs(sharedConfig.currentVehicles) do
+    for _, v in pairs(currentVehicles) do
         if joaat(v) == vehicleModel then
             return true
         end
@@ -95,14 +95,14 @@ end
 
 local function createListEmail()
     if cache.vehicle then return end
-    if not sharedConfig.currentVehicles or table.type(sharedConfig.currentVehicles) == 'empty' then
+    if not currentVehicles or table.type(currentVehicles) == 'empty' then
        exports.qbx_core:Notify(Lang:t('error.demolish_vehicle'), 'error')
         return
     end
 
     emailSent = true
     local vehicleList = ""
-    for _, v in pairs(sharedConfig.currentVehicles) do
+    for _, v in pairs(currentVehicles) do
         local vehicleInfo = VEHICLES[v]
         if vehicleInfo then
             vehicleList = vehicleList  .. vehicleInfo["brand"] .. " " .. vehicleInfo["name"] .. "<br />"
@@ -125,7 +125,7 @@ RegisterNetEvent("QBCore:Client:OnPlayerLoaded", function()
 end)
 
 RegisterNetEvent('qb-scapyard:client:setNewVehicles', function(vehicleList)
-    sharedConfig.currentVehicles = vehicleList
+    currentVehicles = vehicleList
 end)
 
 CreateThread(function()

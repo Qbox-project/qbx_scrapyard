@@ -22,7 +22,6 @@ server_scripts {
 
 files {
     'config/client.lua',
-    'config/shared.lua'
 }
 
 provide 'qb-scrapyard'
