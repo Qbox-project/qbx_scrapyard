@@ -1,10 +1,12 @@
+local config = require 'config.server'
+local sharedConfig = require 'config.shared'
 local ITEMS = exports.ox_inventory:Items()
 
 local function isInList(name)
     local retval = false
-    if Config.CurrentVehicles ~= nil and next(Config.CurrentVehicles) ~= nil then
-        for k in pairs(Config.CurrentVehicles) do
-            if Config.CurrentVehicles[k] == name then
+    if sharedConfig.currentVehicles ~= nil and next(sharedConfig.currentVehicles) ~= nil then
+        for k in pairs(sharedConfig.currentVehicles) do
+            if sharedConfig.currentVehicles[k] == name then
                 retval = true
             end
         end
@@ -13,14 +15,14 @@ local function isInList(name)
 end
 
 local function generateVehicleList()
-    Config.CurrentVehicles = {}
+    sharedConfig.currentVehicles = {}
     for i = 1, 40, 1 do
-        local randVehicle = Config.Vehicles[math.random(1, #Config.Vehicles)]
+        local randVehicle = config.vehicles[math.random(1, #config.vehicles)]
         if not isInList(randVehicle) then
-            Config.CurrentVehicles[i] = randVehicle
+            sharedConfig.currentVehicles[i] = randVehicle
         end
     end
-    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, Config.CurrentVehicles)
+    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, sharedConfig.currentVehicles)
 end
 
 lib.callback.register('qb-scrapyard:server:checkOwnerVehicle', function(_, plate)
@@ -33,16 +35,16 @@ lib.callback.register('qb-scrapyard:server:checkOwnerVehicle', function(_, plate
 end)
 
 RegisterNetEvent('qb-scrapyard:server:LoadVehicleList', function()
-    TriggerClientEvent("qb-scapyard:client:setNewVehicles", source, Config.CurrentVehicles)
+    TriggerClientEvent("qb-scapyard:client:setNewVehicles", source, sharedConfig.currentVehicles)
 end)
 
 RegisterNetEvent('qb-scrapyard:server:ScrapVehicle', function(listKey)
     local src = source
     local Player = exports.qbx_core:GetPlayer(src)
-    if not Player or not Config.CurrentVehicles[listKey] then return end
+    if not Player or not sharedConfig.currentVehicles[listKey] then return end
 
     for _ = 1, math.random(2, 4), 1 do
-        local item = Config.Items[math.random(1, #Config.Items)]
+        local item = config.items[math.random(1, #config.items)]
         Player.Functions.AddItem(item, math.random(25, 45))
         TriggerClientEvent('inventory:client:ItemBox', src, ITEMS[item], 'add')
         Wait(500)
@@ -56,8 +58,8 @@ RegisterNetEvent('qb-scrapyard:server:ScrapVehicle', function(listKey)
         TriggerClientEvent('inventory:client:ItemBox', src, ITEMS["rubber"], 'add')
     end
 
-    Config.CurrentVehicles[listKey] = nil
-    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, Config.CurrentVehicles)
+    sharedConfig.currentVehicles[listKey] = nil
+    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, sharedConfig.currentVehicles)
 end)
 
 CreateThread(function()
