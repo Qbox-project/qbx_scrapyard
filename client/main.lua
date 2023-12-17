@@ -3,20 +3,36 @@ local VEHICLES = exports.qbx_core:GetVehiclesByName()
 local currentVehicles = {}
 local emailSent = false
 local isBusy = false
+local isLoggedIn = LocalPlayer.state.isLoggedIn
+
+local function setLocationsBlip()
+    if not config.useBlips then return end
+    for _, value in pairs(config.locations) do
+        local blip = AddBlipForCoord(value.coords.x, value.coords.y, value.coords.z)
+        SetBlipSprite(blip, value.blipIcon)
+        SetBlipDisplay(blip, 4)
+        SetBlipScale(blip, 0.8)
+        SetBlipAsShortRange(blip, true)
+        SetBlipColour(blip, 9)
+        BeginTextCommandSetBlipName('STRING')
+        AddTextComponentSubstringPlayerName(value.blipName)
+        EndTextCommandSetBlipName(blip)
+    end
+end
 
 local function scrapVehicleAnim(time)
     time /= 1000
-    lib.requestAnimDict("mp_car_bomb")
-    TaskPlayAnim(cache.ped, "mp_car_bomb", "car_bomb_mechanic", 3.0, 3.0, -1, 16, 0, false, false, false)
+    lib.requestAnimDict('mp_car_bomb')
+    TaskPlayAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
     local openingDoor = true
     CreateThread(function()
         while openingDoor do
-            TaskPlayAnim(cache.ped, "mp_car_bomb", "car_bomb_mechanic", 3.0, 3.0, -1, 16, 0, false, false, false)
+            TaskPlayAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
             Wait(2000)
             time -= 2
             if time <= 0 or not isBusy then
                 openingDoor = false
-                StopAnimTask(cache.ped, "mp_car_bomb", "car_bomb_mechanic", 1.0)
+                StopAnimTask(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 1.0)
             end
         end
     end)
@@ -57,14 +73,14 @@ local function scrapVehicle()
     if cache.seat == -1 then
         if isVehicleValid(GetEntityModel(vehicle)) then
             local vehiclePlate = GetPlate(vehicle)
-            local retval = lib.callback.await('qb-scrapyard:server:checkOwnerVehicle', false, vehiclePlate)
+            local retval = lib.callback.await('qbx_scrapyard:server:checkVehicleOwner', false, vehiclePlate)
             if retval then
                 isBusy = true
                 local scrapTime = math.random(28000, 37000)
                 scrapVehicleAnim(scrapTime)
                 if lib.progressBar({
                     duration = scrapTime,
-                    label = Lang:t('text.demolish_vehicle'),
+                    label = Lang:t('text.scrap_vehicle'),
                     useWhileDead = false,
                     canCancel = true,
                     disable = {
@@ -74,41 +90,40 @@ local function scrapVehicle()
                         combat = true
                     }
                 }) then
-                    TriggerServerEvent("qb-scrapyard:server:ScrapVehicle", getVehicleKey(GetEntityModel(vehicle)))
+                    TriggerServerEvent('qbx_scrapyard:server:scrapVehicle', getVehicleKey(GetEntityModel(vehicle)))
                     SetEntityAsMissionEntity(vehicle, true, true)
                     DeleteVehicle(vehicle)
                 else
-                   exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
+                    exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
                 end
-
                 isBusy = false
             else
-               exports.qbx_core:Notify(Lang:t('error.smash_own'), 'error')
+                exports.qbx_core:Notify(Lang:t('error.scrap_owned'), 'error')
             end
         else
-           exports.qbx_core:Notify(Lang:t('error.cannot_scrap'), 'error')
+            exports.qbx_core:Notify(Lang:t('error.cannot_scrap'), 'error')
         end
     else
-       exports.qbx_core:Notify(Lang:t('error.not_driver'), 'error')
+        exports.qbx_core:Notify(Lang:t('error.not_driver'), 'error')
     end
 end
 
 local function createListEmail()
     if cache.vehicle then return end
     if not currentVehicles or table.type(currentVehicles) == 'empty' then
-       exports.qbx_core:Notify(Lang:t('error.demolish_vehicle'), 'error')
+        exports.qbx_core:Notify(Lang:t('error.scrap_vehicle'), 'error')
         return
     end
 
     emailSent = true
-    local vehicleList = ""
+    local vehicleList = ''
     for _, v in pairs(currentVehicles) do
         local vehicleInfo = VEHICLES[v]
         if vehicleInfo then
-            vehicleList = vehicleList  .. vehicleInfo["brand"] .. " " .. vehicleInfo["name"] .. "<br />"
+            vehicleList = vehicleList .. vehicleInfo['brand'] .. ' ' .. vehicleInfo['name'] .. '<br />'
         end
     end
-   exports.qbx_core:Notify(Lang:t('text.email_sent'), 'success')
+    exports.qbx_core:Notify(Lang:t('text.email_sent'), 'success')
     SetTimeout(math.random(15000, 20000), function()
         emailSent = false
         TriggerServerEvent('qb-phone:server:sendNewMail', {
@@ -120,137 +135,108 @@ local function createListEmail()
     end)
 end
 
-RegisterNetEvent("QBCore:Client:OnPlayerLoaded", function()
-    TriggerServerEvent("qb-scrapyard:server:LoadVehicleList")
+local function deliverZones()
+    local function onEnter()
+        if cache.vehicle and not isBusy then
+            lib.showTextUI(Lang:t('text.disassemble_vehicle'))
+        end
+    end
+
+    local function onExit()
+        lib.hideTextUI()
+    end
+
+    local function inside()
+        if IsControlJustPressed(0, 38) and not isBusy then
+            lib.hideTextUI()
+            scrapVehicle()
+            return
+        end
+    end
+
+    lib.zones.box({
+        coords = config.locations.deliver.coords,
+        size = vec3(4, 4, 4),
+        rotation = 77.63,
+        debug = config.debugPoly,
+        inside = inside,
+        onEnter = onEnter,
+        onExit = onExit
+    })
+end
+
+local function listZone()
+    if config.useTarget then
+        local model = config.locations.main.pedModel
+        local coords = config.locations.main.coords
+        lib.print.debug(config.locations.main)
+        lib.requestModel(model, 500)
+        local pedList = CreatePed(4, model, coords.x, coords.y, coords.z - 1, coords.w, true, true)
+        FreezeEntityPosition(pedList, true)
+        exports.ox_target:addLocalEntity(pedList, {
+            {
+                name = 'scrapyard_list',
+                label = Lang:t('text.email_list_target'),
+                icon = 'fas fa-list-ul',
+                distance = 1.5,
+                onSelect = createListEmail,
+                canInteract = function()
+                    return not emailSent
+                end,
+            }
+        })
+    else
+        local function onEnter()
+            if not cache.vehicle and not isBusy then
+                lib.showTextUI(Lang:t('text.email_list'))
+            end
+        end
+
+        local function onExit()
+            lib.hideTextUI()
+        end
+
+        local function inside()
+            if IsControlJustPressed(0, 38) and not emailSent then
+                lib.hideTextUI()
+                createListEmail()
+                return
+            end
+        end
+
+        lib.zones.box({
+            coords = config.locations.main.coords,
+            size = vec3(2, 2, 2),
+            rotation = 65,
+            debug = config.debugPoly,
+            inside = inside,
+            onEnter = onEnter,
+            onExit = onExit
+        })
+    end
+end
+
+local function init()
+    setLocationsBlip()
+    deliverZones()
+    listZone()
+end
+
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
+    TriggerServerEvent('qbx_scrapyard:server:loadVehicleList')
+    isLoggedIn = true
+    init()
 end)
 
-RegisterNetEvent('qb-scapyard:client:setNewVehicles', function(vehicleList)
+RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+    isLoggedIn = false
+end)
+
+RegisterNetEvent('qbx_scrapyard:client:setNewVehicles', function(vehicleList)
     currentVehicles = vehicleList
 end)
 
 CreateThread(function()
-    for _, v in pairs(config.locations) do
-        local blip = AddBlipForCoord(v.main.x, v.main.y, v.main.z)
-        SetBlipSprite(blip, 380)
-        SetBlipDisplay(blip, 4)
-        SetBlipScale(blip, 0.7)
-        SetBlipAsShortRange(blip, true)
-        SetBlipColour(blip, 9)
-        BeginTextCommandSetBlipName("STRING")
-        AddTextComponentSubstringPlayerName(Lang:t('text.scrapyard'))
-        EndTextCommandSetBlipName(blip)
-    end
-
-    for i = 1, #config.locations, 1 do
-        for k, v in pairs(config.locations[i]) do
-            if k ~= 'main' then
-                if config.useTarget then
-                    if k == 'deliver' then
-                        local function onEnter()
-                            if cache.vehicle and not isBusy then
-                                lib.showTextUI(Lang:t('text.disassemble_vehicle'), {position = 'left-center'})
-                            end
-                        end
-
-                        local function onExit()
-                            lib.hideTextUI()
-                        end
-
-                        local function inside()
-                            if IsControlPressed(0, 38) and not isBusy then
-                                lib.hideTextUI()
-                                scrapVehicle()
-                                return
-                            end
-                        end
-
-                        lib.zones.box({
-                            coords = vec3(v?.coords.x, v?.coords.y, v?.coords.z),
-                            size = vec3(4, 4, 4),
-                            rotation = v?.heading,
-                            debug = config.debugPoly,
-                            inside = inside,
-                            onEnter = onEnter,
-                            onExit = onExit
-                        })
-                    else
-                        local model = v?.pedModel
-                        lib.requestModel(model, 500)
-                        local pedList = CreatePed(4, model, v?.coords.x, v?.coords.y, v?.coords.z - 1, v?.coords.w, true, true)
-                        FreezeEntityPosition(pedList, true)
-                        exports.ox_target:addLocalEntity(pedList, {
-                            {
-                                name = "scrapyard_list" .. i,
-                                label = Lang:t("text.email_list_target"),
-                                icon = "fas fa-list-ul",
-                                distance = 1.5,
-                                onSelect = createListEmail,
-                                canInteract = function()
-                                    return not emailSent
-                                end,
-                            }
-                        })
-                    end
-                else
-                    if k == 'deliver' then
-                        local function onEnter()
-                            if cache.vehicle and not isBusy then
-                                lib.showTextUI(Lang:t('text.disassemble_vehicle'), {position = 'left-center'})
-                            end
-                        end
-
-                        local function onExit()
-                            lib.hideTextUI()
-                        end
-
-                        local function inside()
-                            if IsControlPressed(0, 38) and not isBusy then
-                                lib.hideTextUI()
-                                scrapVehicle()
-                                return
-                            end
-                        end
-
-                        lib.zones.box({
-                            coords = vec3(v.coords.x, v.coords.y, v.coords.z),
-                            size = vec3(4, 4, 4),
-                            rotation = v.heading,
-                            debug = config.debugPoly,
-                            inside = inside,
-                            onEnter = onEnter,
-                            onExit = onExit
-                        })
-                    else
-                        local function onEnter()
-                            if not cache.vehicle and not isBusy then
-                                lib.showTextUI(Lang:t('text.email_list_target'), {position = 'left-center'})
-                            end
-                        end
-
-                        local function onExit()
-                            lib.hideTextUI()
-                        end
-
-                        local function inside()
-                            if IsControlPressed(0, 38) and not emailSent then
-                                lib.hideTextUI()
-                                createListEmail()
-                                return
-                            end
-                        end
-
-                        lib.zones.box({
-                            coords = vec3(v.coords.x, v.coords.y, v.coords.z),
-                            size = vec3(4, 4, 4),
-                            rotation = v.heading,
-                            debug = config.debugPoly,
-                            inside = inside,
-                            onEnter = onEnter,
-                            onExit = onExit
-                        })
-                    end
-                end
-            end
-        end
-    end
+    if not isLoggedIn then return end
+    init()
 end)

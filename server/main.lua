@@ -1,5 +1,4 @@
 local config = require 'config.server'
-local ITEMS = exports.ox_inventory:Items()
 local currentVehicles = {}
 
 local function isInList(name)
@@ -22,11 +21,11 @@ local function generateVehicleList()
             currentVehicles[i] = randVehicle
         end
     end
-    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, currentVehicles)
+    TriggerClientEvent("qbx_scrapyard:client:setNewVehicles", -1, currentVehicles)
 end
 
-lib.callback.register('qb-scrapyard:server:checkOwnerVehicle', function(_, plate)
-    local vehicle = MySQL.scalar.await("SELECT `plate` FROM `player_vehicles` WHERE `plate` = ?", {plate})
+lib.callback.register('qbx_scrapyard:server:checkVehicleOwner', function(_, plate)
+    local vehicle = MySQL.scalar.await('SELECT `plate` FROM `player_vehicles` WHERE `plate` = ?', {plate})
     if not vehicle then
         return true
     else
@@ -34,19 +33,18 @@ lib.callback.register('qb-scrapyard:server:checkOwnerVehicle', function(_, plate
     end
 end)
 
-RegisterNetEvent('qb-scrapyard:server:LoadVehicleList', function()
-    TriggerClientEvent("qb-scapyard:client:setNewVehicles", source, currentVehicles)
+RegisterNetEvent('qbx_scrapyard:server:loadVehicleList', function()
+    TriggerClientEvent("qbx_scrapyard:client:setNewVehicles", source, currentVehicles)
 end)
 
-RegisterNetEvent('qb-scrapyard:server:ScrapVehicle', function(listKey)
+RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey)
     local src = source
-    local Player = exports.qbx_core:GetPlayer(src)
-    if not Player or not currentVehicles[listKey] then return end
+    local player = exports.qbx_core:GetPlayer(src)
+    if not player or not currentVehicles[listKey] then return end
 
     for _ = 1, math.random(2, 4), 1 do
         local item = config.items[math.random(1, #config.items)]
-        Player.Functions.AddItem(item, math.random(25, 45))
-        TriggerClientEvent('inventory:client:ItemBox', src, ITEMS[item], 'add')
+        exports.ox_inventory:AddItem(src, item, math.random(25, 45))
         Wait(500)
     end
 
@@ -54,12 +52,11 @@ RegisterNetEvent('qb-scrapyard:server:ScrapVehicle', function(listKey)
     local odd = math.random(1, 8)
     if luck == odd then
         local random = math.random(10, 20)
-        Player.Functions.AddItem("rubber", random)
-        TriggerClientEvent('inventory:client:ItemBox', src, ITEMS["rubber"], 'add')
+        exports.ox_inventory:AddItem(src, 'rubber', random)
     end
 
     currentVehicles[listKey] = nil
-    TriggerClientEvent("qb-scapyard:client:setNewVehicles", -1, currentVehicles)
+    TriggerClientEvent("qbx_scrapyard:client:setNewVehicles", -1, currentVehicles)
 end)
 
 CreateThread(function()
