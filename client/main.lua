@@ -169,7 +169,6 @@ local function listZone()
     if config.useTarget then
         local model = config.locations.main.pedModel
         local coords = config.locations.main.coords
-        lib.print.debug(config.locations.main)
         lib.requestModel(model, 500)
         local pedList = CreatePed(4, model, coords.x, coords.y, coords.z - 1, coords.w, true, true)
         FreezeEntityPosition(pedList, true)
