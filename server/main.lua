@@ -20,6 +20,7 @@ local function generateVehicleList()
             currentVehicles[#currentVehicles + 1] = randVehicle
         end
     end
+
     TriggerClientEvent('qbx_scrapyard:client:setNewVehicles', -1, currentVehicles)
 end
 
@@ -53,7 +54,7 @@ RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey, netId)
         exports.ox_inventory:AddItem(src, 'rubber', random)
     end
 
-    currentVehicles[listKey] = nil
+    table.remove(currentVehicles, listKey)
     TriggerClientEvent('qbx_scrapyard:client:setNewVehicles', -1, currentVehicles)
 end)
 
