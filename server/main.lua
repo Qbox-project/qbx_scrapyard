@@ -2,46 +2,45 @@ local config = require 'config.server'
 local currentVehicles = {}
 
 local function isInList(name)
-    local retval = false
-    if currentVehicles ~= nil and next(currentVehicles) ~= nil then
-        for k in pairs(currentVehicles) do
-            if currentVehicles[k] == name then
-                retval = true
+    if next(currentVehicles) then
+        for i = 1, #currentVehicles do
+            if currentVehicles[i] == name then
+                return true
             end
         end
     end
-    return retval
+    return false
 end
 
 local function generateVehicleList()
-    currentVehicles = {}
-    for i = 1, 40, 1 do
+    table.wipe(currentVehicles)
+    while #currentVehicles < 40 do
         local randVehicle = config.vehicles[math.random(1, #config.vehicles)]
         if not isInList(randVehicle) then
-            currentVehicles[i] = randVehicle
+            currentVehicles[#currentVehicles + 1] = randVehicle
         end
     end
-    TriggerClientEvent("qbx_scrapyard:client:setNewVehicles", -1, currentVehicles)
+
+    TriggerClientEvent('qbx_scrapyard:client:setNewVehicles', -1, currentVehicles)
 end
 
 lib.callback.register('qbx_scrapyard:server:checkVehicleOwner', function(_, plate)
-    local vehicle = MySQL.scalar.await('SELECT `plate` FROM `player_vehicles` WHERE `plate` = ?', {plate})
-    if not vehicle then
-        return true
-    else
-        return false
-    end
+    local vehicle = MySQL.single.await('SELECT * FROM player_vehicles WHERE plate = ?', {plate})
+    return vehicle and true or false
 end)
 
-RegisterNetEvent('qbx_scrapyard:server:loadVehicleList', function()
-    TriggerClientEvent("qbx_scrapyard:client:setNewVehicles", source, currentVehicles)
+RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
+    TriggerClientEvent('qbx_scrapyard:client:setNewVehicles', source, currentVehicles)
 end)
 
-RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey)
+RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey, netId)
     local src = source
     local player = exports.qbx_core:GetPlayer(src)
-    if not player or not currentVehicles[listKey] then return end
+    local entity = NetworkGetEntityFromNetworkId(netId)
+    if not player or not currentVehicles[listKey] or not DoesEntityExist(entity) then return end
 
+    DeleteEntity(entity)
+    
     for _ = 1, math.random(2, 4), 1 do
         local item = config.items[math.random(1, #config.items)]
         exports.ox_inventory:AddItem(src, item, math.random(25, 45))
@@ -55,14 +54,13 @@ RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey)
         exports.ox_inventory:AddItem(src, 'rubber', random)
     end
 
-    currentVehicles[listKey] = nil
-    TriggerClientEvent("qbx_scrapyard:client:setNewVehicles", -1, currentVehicles)
+    table.remove(currentVehicles, listKey)
+    TriggerClientEvent('qbx_scrapyard:client:setNewVehicles', -1, currentVehicles)
 end)
 
-CreateThread(function()
-    Wait(1000)
-    while true do
-        generateVehicleList()
-        Wait(1000 * 60 * 60)
-    end
+AddEventHandler('onResourceStart', function(resource)
+    if resource ~= GetCurrentResourceName() then return end
+    SetTimeout(2000, generateVehicleList)
 end)
+
+SetInterval(generateVehicleList, 60 * 60000)

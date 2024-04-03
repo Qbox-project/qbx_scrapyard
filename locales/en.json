@@ -1,0 +1,21 @@
+{
+    "error": {
+        "scrap_owned": "You can't scrap player owned vehicles.",
+        "cannot_scrap": "This vehicle cannot be scrapped.",
+        "not_driver": "You are not the driver",
+        "scrap_vehicle": "You are not allowed to scrap vehicles now",
+        "canceled": "Canceled"
+    },
+    "text": {
+        "disassemble_vehicle": "[E] - Disassemble Vehicle",
+        "email_list": "[E] - E-mail Vehicle List",
+        "email_list_target": "E-mail Vehicle List",
+        "scrap_vehicle": "Scrapping Vehicle",
+        "email_sent": "You will receive the list by email in a few seconds"
+    },
+    "email": {
+        "sender": "Turner's Auto Wrecking",
+        "subject": "Vehicle List",
+        "message": "You can only scrap a limited number of vehicles..<br />You can keep everything you scrap for yourself as long as you don't bother me.<br /><br /><strong>Vehicle List:</strong><br />"
+    }
+}

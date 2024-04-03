@@ -70,48 +70,45 @@ local function scrapVehicle()
     local vehicle = cache.vehicle
     if not vehicle or isBusy then return end
 
-    if cache.seat == -1 then
-        if isVehicleValid(GetEntityModel(vehicle)) then
-            local vehiclePlate = GetPlate(vehicle)
-            local retval = lib.callback.await('qbx_scrapyard:server:checkVehicleOwner', false, vehiclePlate)
-            if retval then
-                isBusy = true
-                local scrapTime = math.random(28000, 37000)
-                scrapVehicleAnim(scrapTime)
-                if lib.progressBar({
-                    duration = scrapTime,
-                    label = Lang:t('text.scrap_vehicle'),
-                    useWhileDead = false,
-                    canCancel = true,
-                    disable = {
-                        move = true,
-                        car = true,
-                        mouse = false,
-                        combat = true
-                    }
-                }) then
-                    TriggerServerEvent('qbx_scrapyard:server:scrapVehicle', getVehicleKey(GetEntityModel(vehicle)))
-                    SetEntityAsMissionEntity(vehicle, true, true)
-                    DeleteVehicle(vehicle)
-                else
-                    exports.qbx_core:Notify(Lang:t('error.canceled'), 'error')
-                end
-                isBusy = false
-            else
-                exports.qbx_core:Notify(Lang:t('error.scrap_owned'), 'error')
-            end
-        else
-            exports.qbx_core:Notify(Lang:t('error.cannot_scrap'), 'error')
-        end
-    else
-        exports.qbx_core:Notify(Lang:t('error.not_driver'), 'error')
+    if cache.seat ~= -1 then
+        return exports.qbx_core:Notify(locale('error.not_driver'), 'error')
     end
+
+    if not isVehicleValid(GetEntityModel(vehicle)) then
+        return exports.qbx_core:Notify(locale('error.cannot_scrap'), 'error')
+    end
+
+    local vehiclePlate = qbx.getVehiclePlate(vehicle)
+
+    local isOwned = lib.callback.await('qbx_scrapyard:server:checkVehicleOwner', false, vehiclePlate)
+    if isOwned then
+        return exports.qbx_core:Notify(locale('error.scrap_owned'), 'error')
+    end
+
+    isBusy = true
+    local scrapTime = math.random(28000, 37000)
+    scrapVehicleAnim(scrapTime)
+    if lib.progressBar({
+        duration = scrapTime,
+        label = locale('text.scrap_vehicle'),
+        useWhileDead = false,
+        canCancel = true,
+        disable = {
+            move = true,
+            car = true,
+            mouse = false,
+            combat = true
+        }
+    }) then
+        TriggerServerEvent('qbx_scrapyard:server:scrapVehicle', getVehicleKey(GetEntityModel(vehicle)), NetworkGetNetworkIdFromEntity(vehicle))
+    end
+    isBusy = false
 end
 
 local function createListEmail()
     if cache.vehicle then return end
     if not currentVehicles or table.type(currentVehicles) == 'empty' then
-        exports.qbx_core:Notify(Lang:t('error.scrap_vehicle'), 'error')
+        exports.qbx_core:Notify(locale('error.scrap_vehicle'), 'error')
         return
     end
 
@@ -123,13 +120,13 @@ local function createListEmail()
             vehicleList = vehicleList .. vehicleInfo['brand'] .. ' ' .. vehicleInfo['name'] .. '<br />'
         end
     end
-    exports.qbx_core:Notify(Lang:t('text.email_sent'), 'success')
+    exports.qbx_core:Notify(locale('text.email_sent'), 'success')
     SetTimeout(math.random(15000, 20000), function()
         emailSent = false
         TriggerServerEvent('qb-phone:server:sendNewMail', {
-            sender = Lang:t('email.sender'),
-            subject = Lang:t('email.subject'),
-            message = Lang:t('email.message') .. vehicleList,
+            sender = locale('email.sender'),
+            subject = locale('email.subject'),
+            message = locale('email.message') .. vehicleList,
             button = {}
         })
     end)
@@ -138,7 +135,7 @@ end
 local function deliverZones()
     local function onEnter()
         if cache.vehicle and not isBusy then
-            lib.showTextUI(Lang:t('text.disassemble_vehicle'))
+            lib.showTextUI(locale('text.disassemble_vehicle'))
         end
     end
 
@@ -175,7 +172,7 @@ local function listZone()
         exports.ox_target:addLocalEntity(pedList, {
             {
                 name = 'scrapyard_list',
-                label = Lang:t('text.email_list_target'),
+                label = locale('text.email_list_target'),
                 icon = 'fas fa-list-ul',
                 distance = 1.5,
                 onSelect = createListEmail,
@@ -187,7 +184,7 @@ local function listZone()
     else
         local function onEnter()
             if not cache.vehicle and not isBusy then
-                lib.showTextUI(Lang:t('text.email_list'))
+                lib.showTextUI(locale('text.email_list'))
             end
         end
 
@@ -222,7 +219,6 @@ local function init()
 end
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-    TriggerServerEvent('qbx_scrapyard:server:loadVehicleList')
     isLoggedIn = true
     init()
 end)
