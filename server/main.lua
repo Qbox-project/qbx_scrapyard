@@ -32,11 +32,14 @@ RegisterNetEvent('QBCore:Server:OnPlayerLoaded', function()
     TriggerClientEvent('qbx_scrapyard:client:setNewVehicles', source, currentVehicles)
 end)
 
-RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey)
+RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey, netId)
     local src = source
     local player = exports.qbx_core:GetPlayer(src)
-    if not player or not currentVehicles[listKey] then return end
+    local entity = NetworkGetEntityFromNetworkId(netId)
+    if not player or not currentVehicles[listKey] or not DoesEntityExist(entity) then return end
 
+    DeleteEntity(entity)
+    
     for _ = 1, math.random(2, 4), 1 do
         local item = config.items[math.random(1, #config.items)]
         exports.ox_inventory:AddItem(src, item, math.random(25, 45))

@@ -100,9 +100,7 @@ local function scrapVehicle()
             combat = true
         }
     }) then
-        TriggerServerEvent('qbx_scrapyard:server:scrapVehicle', getVehicleKey(GetEntityModel(vehicle)))
-        SetEntityAsMissionEntity(vehicle, true, true)
-        DeleteVehicle(vehicle)
+        TriggerServerEvent('qbx_scrapyard:server:scrapVehicle', getVehicleKey(GetEntityModel(vehicle)), NetworkGetNetworkIdFromEntity(vehicle))
     end
     isBusy = false
 end
