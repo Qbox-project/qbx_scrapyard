@@ -1,0 +1,21 @@
+{
+    "error": {
+        "scrap_owned": "Não podes desmantelar veículos de jogadores.",
+        "cannot_scrap": "Este veículo não pode ser desmantelado.",
+        "not_driver": "Não és o condutor",
+        "scrap_vehicle": "Não podes desmantelar veículos agora",
+        "canceled": "Cancelado"
+    },
+    "text": {
+        "disassemble_vehicle": "[E] - Desmontar Veículo",
+        "email_list": "[E] - Lista de Veículos por E-mail",
+        "email_list_target": "Lista de Veículos por E-mail",
+        "scrap_vehicle": "A Desmantelar Veículo",
+        "email_sent": "Receberás a lista por e-mail em alguns segundos"
+    },
+    "email": {
+        "sender": "Turner's Auto Wrecking",
+        "subject": "Lista de Veículos",
+        "message": "Podes desmantelar apenas um número limitado de veículos..<br />Podes ficar com tudo o que desmantelares, desde que não me chateies.<br /><br /><strong>Lista de Veículos:</strong><br />"
+    }
+}
