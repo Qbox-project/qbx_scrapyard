@@ -22,12 +22,11 @@ end
 
 local function scrapVehicleAnim(time)
     time /= 1000
-    lib.requestAnimDict('mp_car_bomb')
-    TaskPlayAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
+    lib.playAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
     local openingDoor = true
     CreateThread(function()
         while openingDoor do
-            TaskPlayAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
+            lib.playAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
             Wait(2000)
             time -= 2
             if time <= 0 or not isBusy then
