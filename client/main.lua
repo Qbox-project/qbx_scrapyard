@@ -166,8 +166,9 @@ local function listZone()
     if config.useTarget then
         local model = config.locations.main.pedModel
         local coords = config.locations.main.coords
-        lib.requestModel(model, 500)
+        lib.requestModel(model, 5000)
         local pedList = CreatePed(4, model, coords.x, coords.y, coords.z - 1, coords.w, true, true)
+        SetModelAsNoLongerNeeded(model)
         FreezeEntityPosition(pedList, true)
         exports.ox_target:addLocalEntity(pedList, {
             {
