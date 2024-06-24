@@ -22,12 +22,11 @@ end
 
 local function scrapVehicleAnim(time)
     time /= 1000
-    lib.requestAnimDict('mp_car_bomb')
-    TaskPlayAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
+    lib.playAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
     local openingDoor = true
     CreateThread(function()
         while openingDoor do
-            TaskPlayAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
+            lib.playAnim(cache.ped, 'mp_car_bomb', 'car_bomb_mechanic', 3.0, 3.0, -1, 16, 0, false, false, false)
             Wait(2000)
             time -= 2
             if time <= 0 or not isBusy then
@@ -166,8 +165,9 @@ local function listZone()
     if config.useTarget then
         local model = config.locations.main.pedModel
         local coords = config.locations.main.coords
-        lib.requestModel(model, 500)
+        lib.requestModel(model, 5000)
         local pedList = CreatePed(4, model, coords.x, coords.y, coords.z - 1, coords.w, true, true)
+        SetModelAsNoLongerNeeded(model)
         FreezeEntityPosition(pedList, true)
         exports.ox_target:addLocalEntity(pedList, {
             {
