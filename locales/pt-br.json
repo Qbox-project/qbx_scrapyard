@@ -1,0 +1,21 @@
+{
+    "error": {
+        "scrap_owned": "Você não pode desmontar veículos de jogadores.",
+        "cannot_scrap": "Este veículo não pode ser desmontado.",
+        "not_driver": "Você não é o motorista",
+        "scrap_vehicle": "Você não tem permissão para desmontar veículos agora",
+        "canceled": "Cancelado"
+    },
+    "text": {
+        "disassemble_vehicle": "[E] - Desmontar Veículo",
+        "email_list": "[E] - Enviar Lista de Veículos por E-mail",
+        "email_list_target": "Enviar Lista de Veículos por E-mail",
+        "scrap_vehicle": "Desmontando Veículo",
+        "email_sent": "Você receberá a lista por e-mail em alguns segundos"
+    },
+    "email": {
+        "sender": "Desmanche Turner",
+        "subject": "Lista de Veículos",
+        "message": "Você pode desmontar um número limitado de veículos...<br />Você pode ficar com tudo o que desmontar, desde que não me incomode.<br /><br /><strong>Lista de Veículos:</strong><br />"
+    }
+}
