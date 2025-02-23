@@ -1,0 +1,21 @@
+{
+  "error": {
+    "scrap_owned": "Nie można złomować pojazdów należących do graczy.",
+    "cannot_scrap": "Ten pojazd nie może być złomowany.",
+    "not_driver": "Nie jesteś kierowcą",
+    "scrap_vehicle": "Nie masz uprawnień do złomowania pojazdów w tej chwili",
+    "canceled": "Anulowano"
+  },
+  "text": {
+    "disassemble_vehicle": "[E] - Rozbierz pojazd",
+    "email_list": "[E] - Wyślij listę pojazdów e-mailem",
+    "email_list_target": "Wyślij listę pojazdów e-mailem",
+    "scrap_vehicle": "Złomowanie pojazdu",
+    "email_sent": "Lista zostanie wysłana na e-mail w ciągu kilku sekund"
+  },
+  "email": {
+    "sender": "Turner's Auto Wrecking",
+    "subject": "Lista pojazdów",
+    "message": "Możesz złomować tylko ograniczoną liczbę pojazdów.<br />Możesz zatrzymać wszystko, co złomujesz, pod warunkiem, że nie przeszkadzasz mi.<br /><br /><strong>Lista pojazdów:</strong><br />"
+  }
+}
