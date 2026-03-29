@@ -1,0 +1,21 @@
+{
+    "error": {
+        "scrap_owned": "プレイヤーが所有する車両を解体することはできません。",
+        "cannot_scrap": "この車両は解体できません。",
+        "not_driver": "あなたはドライバーではありません",
+        "scrap_vehicle": "今は車両を解体することはできません",
+        "canceled": "キャンセルされました"
+    },
+    "text": {
+        "disassemble_vehicle": "[E] - 車両を解体",
+        "email_list": "[E] - 車両リストをメール送信",
+        "email_list_target": "車両リストをメール送信",
+        "scrap_vehicle": "車両を解体中",
+        "email_sent": "数秒後にメールでリストが届きます"
+    },
+    "email": {
+        "sender": "ターナーの自動解体業者",
+        "subject": "車両リスト",
+        "message": "解体できる車両の数には制限があります。<br />解体したものはすべて邪魔をしない限り自分のものにできます。<br /><br /><strong>車両リスト：</strong><br />"
+    }
+}
