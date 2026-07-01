@@ -77,13 +77,6 @@ local function scrapVehicle()
         return exports.qbx_core:Notify(locale('error.cannot_scrap'), 'error')
     end
 
-    local vehiclePlate = qbx.getVehiclePlate(vehicle)
-
-    local isOwned = lib.callback.await('qbx_scrapyard:server:checkVehicleOwner', false, vehiclePlate)
-    if isOwned then
-        return exports.qbx_core:Notify(locale('error.scrap_owned'), 'error')
-    end
-
     isBusy = true
     local scrapTime = math.random(28000, 37000)
     scrapVehicleAnim(scrapTime)
