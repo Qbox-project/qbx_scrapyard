@@ -4,6 +4,7 @@ local scrapyardCoords = clientConfig.locations.deliver.coords
 local maxScrapDistance = 15.0
 local currentVehicles = {}
 local scrapping = {}
+local reservedModels = {}
 
 local function isInList(name)
     if next(currentVehicles) then
@@ -38,7 +39,7 @@ RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey, netId)
 
     local player = exports.qbx_core:GetPlayer(src)
     local expectedModel = currentVehicles[listKey]
-    if not player or not expectedModel then return end
+    if not player or not expectedModel or reservedModels[expectedModel] then return end
 
     local entity = NetworkGetEntityFromNetworkId(netId)
     if not DoesEntityExist(entity) or GetEntityModel(entity) ~= joaat(expectedModel) then return end
@@ -47,16 +48,32 @@ RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey, netId)
 
     if #(GetEntityCoords(entity) - scrapyardCoords) > maxScrapDistance then return end
 
-    scrapping[src] = true
+    scrapping[src] = expectedModel
+    reservedModels[expectedModel] = true
 
     local owned = MySQL.scalar.await('SELECT 1 FROM player_vehicles WHERE plate = ?', {qbx.getVehiclePlate(entity)})
     if owned then
         scrapping[src] = nil
+        reservedModels[expectedModel] = nil
         exports.qbx_core:Notify(src, locale('error.scrap_owned'), 'error')
         return
     end
 
-    table.remove(currentVehicles, listKey)
+    local currentIndex
+    for index = 1, #currentVehicles do
+        if currentVehicles[index] == expectedModel then
+            currentIndex = index
+            break
+        end
+    end
+
+    if not currentIndex then
+        scrapping[src] = nil
+        reservedModels[expectedModel] = nil
+        return
+    end
+
+    table.remove(currentVehicles, currentIndex)
     TriggerClientEvent('qbx_scrapyard:client:setNewVehicles', -1, currentVehicles)
 
     DeleteEntity(entity)
@@ -75,10 +92,7 @@ RegisterNetEvent('qbx_scrapyard:server:scrapVehicle', function(listKey, netId)
     end
 
     scrapping[src] = nil
-end)
-
-AddEventHandler('playerDropped', function()
-    scrapping[source] = nil
+    reservedModels[expectedModel] = nil
 end)
 
 AddEventHandler('onResourceStart', function(resource)
