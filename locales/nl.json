@@ -1,18 +1,16 @@
 {
     "error": {
-        "smash_own": "Je kunt een voertuig dat in het bezit is niet slopen.",
+        "scrap_owned": "Je kunt geen voertuigen die eigendom zijn van spelers weggooien.",
         "cannot_scrap": "Dit voertuig kan niet worden gesloopt.",
         "not_driver": "Jij bent niet de bestuurder",
-        "demolish_vehicle": "Je mag nu geen voertuigen slopen",
+        "scrap_vehicle": "Het is nu niet toegestaan ​​om voertuigen te slopen",
         "canceled": "Geannuleerd"
     },
     "text": {
-        "scrapyard": "Schrootwerf",
         "disassemble_vehicle": "[E] - Voertuig Demonteren",
-        "disassemble_vehicle_target": "Voertuig Demonteren",
         "email_list": "[E] - E-mail Voertuiglijst",
         "email_list_target": "E-mail Voertuiglijst",
-        "demolish_vehicle": "Voertuig Slopen",
+        "scrap_vehicle": "Voertuig slopen",
         "email_sent": "Je ontvangt de lijst binnen enkele seconden per e-mail"
     },
     "email": {
